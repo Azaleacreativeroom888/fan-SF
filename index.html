@@ -1,39 +1,1138 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>SF小説非公式ファンサイト</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      margin: 0;
-      font-family: "メイリオ", sans-serif;
-      background: white;
-      background-attachment: fixed;
-      color: black;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOVA SIGNAL — SF Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cyan: #00f5ff;
+    --magenta: #ff00c8;
+    --amber: #ffb400;
+    --bg: #03060f;
+    --surface: #070d1a;
+    --surface2: #0d1526;
+    --text: #c8daf0;
+    --muted: #4a6080;
+    --border: rgba(0, 245, 255, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* ── SCANLINE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── STAR FIELD ── */
+  #stars {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 3rem;
+    background: rgba(3,6,15,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    color: var(--cyan);
+    text-decoration: none;
+    text-shadow: 0 0 20px rgba(0,245,255,0.5);
+    position: relative;
+  }
+
+  .logo span {
+    color: var(--magenta);
+    text-shadow: 0 0 20px rgba(255,0,200,0.5);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    position: relative;
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--cyan);
+    transition: width 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--cyan); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-links a.active { color: var(--cyan); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    z-index: 1;
+  }
+
+  .hero-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-badge::before {
+    content: '// ';
+    color: var(--magenta);
+  }
+
+  .hero h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2.5rem, 8vw, 6rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero h1 .line1 { color: #fff; }
+  .hero h1 .line2 {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--cyan);
+    text-shadow: none;
+    display: block;
+  }
+
+  .hero-sub {
+    font-size: 0.95rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-top: 1.5rem;
+    margin-bottom: 2.5rem;
+    max-width: 500px;
+    line-height: 1.8;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+
+  .btn-primary {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--cyan);
+    border: none;
+    padding: 0.9rem 2rem;
+    cursor: pointer;
+    text-decoration: none;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: #fff;
+    transform: translateY(-2px);
+  }
+
+  .btn-ghost {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 0.9rem 2rem;
+    cursor: pointer;
+    text-decoration: none;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    transition: all 0.2s;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--cyan);
+    background: rgba(0,245,255,0.05);
+  }
+
+  /* ── SCROLL INDICATOR ── */
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 1.2s forwards;
+  }
+
+  .scroll-hint span {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(to bottom, var(--cyan), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+
+  /* ── SECTION ── */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 5rem 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--magenta);
+    text-transform: uppercase;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.05em;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+
+  /* ── FEATURED CARD ── */
+  .featured-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .card-main {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: border-color 0.3s;
+  }
+
+  .card-main::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, var(--cyan), var(--magenta));
+  }
+
+  .card-main:hover {
+    border-color: rgba(0,245,255,0.4);
+  }
+
+  .card-img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    display: block;
+    position: relative;
+  }
+
+  .card-img-wrap {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-img-placeholder {
+    width: 100%;
+    aspect-ratio: 16/9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 3rem;
+    color: rgba(0,245,255,0.3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    padding: 0.3rem 0.8rem;
+    text-transform: uppercase;
+    clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+  }
+
+  .badge-novel { background: var(--cyan); color: var(--bg); }
+  .badge-film  { background: var(--magenta); color: var(--bg); }
+  .badge-game  { background: var(--amber); color: var(--bg); }
+  .badge-series { background: #7b3fff; color: #fff; }
+
+  .card-body {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-meta {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .card-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+  }
+
+  .card-title-small {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+
+  .card-excerpt {
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--muted);
+    flex: 1;
+    margin-bottom: 1rem;
+  }
+
+  .rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .stars {
+    display: flex;
+    gap: 2px;
+  }
+
+  .star {
+    width: 12px;
+    height: 12px;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    background: var(--amber);
+  }
+
+  .star.empty { background: var(--muted); opacity: 0.4; }
+
+  .rating-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--amber);
+    font-weight: bold;
+  }
+
+  .side-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .card-side {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+    position: relative;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    display: flex;
+    gap: 1rem;
+  }
+
+  .card-side::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--cyan), var(--magenta));
+  }
+
+  .card-side:hover { border-color: rgba(0,245,255,0.4); }
+
+  .card-side .card-body {
+    padding: 0;
+  }
+
+  /* ── REVIEWS GRID ── */
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .review-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    position: relative;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .review-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,245,255,0.03), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .review-card:hover { border-color: rgba(0,245,255,0.35); }
+  .review-card:hover::after { opacity: 1; }
+
+  .review-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 3rem;
+    font-weight: 900;
+    color: rgba(0,245,255,0.07);
+    line-height: 1;
+    margin-bottom: -0.5rem;
+  }
+
+  /* ── CATEGORIES ── */
+  .categories {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+
+  .cat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+    display: block;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cat-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%;
+    height: 2px;
+    transform: scaleX(0);
+    transition: transform 0.3s;
+  }
+
+  .cat-card:nth-child(1)::before { background: var(--cyan); }
+  .cat-card:nth-child(2)::before { background: var(--magenta); }
+  .cat-card:nth-child(3)::before { background: var(--amber); }
+  .cat-card:nth-child(4)::before { background: #7b3fff; }
+
+  .cat-card:hover { border-color: rgba(0,245,255,0.3); transform: translateY(-4px); }
+  .cat-card:hover::before { transform: scaleX(1); }
+
+  .cat-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    display: block;
+    filter: grayscale(0.5);
+  }
+
+  .cat-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #fff;
+    margin-bottom: 0.3rem;
+  }
+
+  .cat-count {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+  }
+
+  /* ── TICKER ── */
+  .ticker-wrap {
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 0.7rem 0;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    margin: 2rem 0;
+  }
+
+  .ticker {
+    display: flex;
+    white-space: nowrap;
+    animation: ticker 30s linear infinite;
+    gap: 0;
+  }
+
+  .ticker-item {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    padding: 0 3rem;
+    text-transform: uppercase;
+  }
+
+  .ticker-item span {
+    color: var(--cyan);
+    margin-right: 0.5rem;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 3rem;
+    background: var(--surface);
+  }
+
+  .footer-brand .logo {
+    display: block;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
+
+  .footer-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .footer-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .footer-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .footer-links a {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .footer-links a::before {
+    content: '›';
+    color: var(--cyan);
+    font-size: 1rem;
+  }
+
+  .footer-links a:hover { color: var(--cyan); }
+
+  .footer-copy {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-copy-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .status-dot {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--cyan);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .status-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* ── GLITCH ── */
+  @keyframes glitch {
+    0%, 100% { clip-path: none; transform: none; }
+    20% { clip-path: inset(20% 0 60% 0); transform: translateX(-3px); }
+    40% { clip-path: inset(60% 0 20% 0); transform: translateX(3px); }
+    60% { clip-path: none; transform: translateX(-1px); }
+  }
+
+  .glitch {
+    position: relative;
+  }
+
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+  }
+
+  .glitch::before {
+    color: var(--cyan);
+    animation: glitch 4s infinite;
+    animation-delay: 0.1s;
+    opacity: 0.6;
+  }
+
+  .glitch::after {
+    color: var(--magenta);
+    animation: glitch 4s infinite;
+    animation-delay: 0.3s;
+    opacity: 0.5;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--cyan); }
+    50% { opacity: 0.4; box-shadow: none; }
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* ── HUD ELEMENT ── */
+  .hud-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    opacity: 0.4;
+  }
+
+  .hud-corner.tl { top: 1rem; left: 1rem; border-top: 1px solid var(--cyan); border-left: 1px solid var(--cyan); }
+  .hud-corner.tr { top: 1rem; right: 1rem; border-top: 1px solid var(--cyan); border-right: 1px solid var(--cyan); }
+  .hud-corner.bl { bottom: 1rem; left: 1rem; border-bottom: 1px solid var(--cyan); border-left: 1px solid var(--cyan); }
+  .hud-corner.br { bottom: 1rem; right: 1rem; border-bottom: 1px solid var(--cyan); border-right: 1px solid var(--cyan); }
+
+  /* ── ORBIT DECORATION ── */
+  .orbit-wrap {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    right: -100px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  .orbit {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--cyan);
+    border-radius: 50%;
+    animation: rotate 20s linear infinite;
+  }
+
+  .orbit:nth-child(2) {
+    inset: 60px;
+    border-color: var(--magenta);
+    animation-duration: 14s;
+    animation-direction: reverse;
+  }
+
+  .orbit:nth-child(3) {
+    inset: 120px;
+    border-color: var(--amber);
+    animation-duration: 10s;
+  }
+
+  .orbit-dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--cyan);
+    top: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { gap: 1.5rem; }
+    section { padding: 4rem 1.5rem; }
+    .featured-grid { grid-template-columns: 1fr; }
+    .reviews-grid { grid-template-columns: repeat(2, 1fr); }
+    .categories { grid-template-columns: repeat(2, 1fr); }
+    footer { grid-template-columns: 1fr; gap: 2rem; padding: 2rem 1.5rem; }
+    .orbit-wrap { display: none; }
+  }
+</style>
 </head>
 <body>
-  <h1>SF小説が好き</h1>
 
-  <p>
-    ※このサイトは『SF小説』の非公式ファンサイトです。
-    原作者・出版社・公式とは一切関係ありません。
-  </p>
+<canvas id="stars"></canvas>
 
-  <h2>このサイトについて</h2>
-  <p>
-    このサイトは、原作・公式とは関係のない非公式サイトです。個人によるファン活動として運営しています。二次創作にご理解のある方にお楽しみいただければ幸いです。
-  </p>
-
-  <h2>最初の記事</h2>
-  <ul>
-    <li><a href="inheritthestars.html">星を継ぐもの</a></li>
+<!-- NAV -->
+<nav>
+  <a class="logo" href="index.html">NOVA<span>SIGNAL</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="active">ホーム</a></li>
+    <li><a href="ranking.html">ランキング</a></li>
+    <li><a href="blog.html">ブログ</a></li>
+    <li><a href="contact.html">コンタクト</a></li>
   </ul>
+</nav>
 
-  <p>注意：当サイトに掲載されている画像・文章・作品について、AI学習への利用、トレース（トレパク）、無断転載・転載、二次利用を禁止します。当サイト内の作品・文章について、スクリーンショットの転載は禁止および無断引用はご遠慮ください。</p>
-  <p>Notice:Please refrain from using any images, text, or works on this website for AI training, tracing, unauthorized reproduction, redistribution, or secondary use. Screenshots and unauthorized quotations of the content on this website are not allowed.</p>
-  
+<!-- HERO -->
+<div class="hero">
+  <div class="orbit-wrap">
+    <div class="orbit"><div class="orbit-dot"></div></div>
+    <div class="orbit"></div>
+    <div class="orbit"></div>
+  </div>
+
+  <p class="hero-badge">SF Universe Review Database v.2.4.1</p>
+  <h1>
+    <span class="line1 glitch" data-text="BEYOND">BEYOND</span>
+    <span class="line2">THE EVENT HORIZON</span>
+  </h1>
+  <p class="hero-sub">宇宙の果てまで続くSFの世界を、徹底レビュー。<br>小説・映画・ゲーム・シリーズ、すべての銀河をカバー。</p>
+  <div class="hero-cta">
+    <a href="ranking.html" class="btn-primary">ランキングを見る</a>
+    <a href="blog.html" class="btn-ghost">レビューを読む</a>
+  </div>
+
+  <div class="scroll-hint">
+    <span>スクロール</span>
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <div class="ticker-item"><span>★ NEW</span>デューン 砂漠の救世主 REVIEW POSTED</div>
+    <div class="ticker-item"><span>★ HOT</span>オールド・マン's・ウォー 評価 9.2/10</div>
+    <div class="ticker-item"><span>★ TOP</span>ニューロマンサー 殿堂入り認定</div>
+    <div class="ticker-item"><span>★ NEW</span>Halo: The Master Chief Collection REVIEW</div>
+    <div class="ticker-item"><span>★ HOT</span>APEX LEGENDS シーズン最新レビュー</div>
+    <div class="ticker-item"><span>★ NEW</span>デューン 砂漠の救世主 REVIEW POSTED</div>
+    <div class="ticker-item"><span>★ HOT</span>オールド・マン's・ウォー 評価 9.2/10</div>
+    <div class="ticker-item"><span>★ TOP</span>ニューロマンサー 殿堂入り認定</div>
+    <div class="ticker-item"><span>★ NEW</span>Halo: The Master Chief Collection REVIEW</div>
+    <div class="ticker-item"><span>★ HOT</span>APEX LEGENDS シーズン最新レビュー</div>
+  </div>
+</div>
+
+<!-- FEATURED -->
+<section>
+  <div class="section-header">
+    <span class="section-label">// 注目</span>
+    <h2 class="section-title">ピックアップ</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="featured-grid">
+    <!-- Main card -->
+    <div class="card-main">
+      <div class="hud-corner tl"></div>
+      <div class="hud-corner br"></div>
+      <div class="card-img-wrap">
+        <svg class="card-img-placeholder" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+          <rect width="800" height="450" fill="#070d1a"/>
+          <circle cx="400" cy="225" r="140" fill="none" stroke="rgba(0,245,255,0.15)" stroke-width="1"/>
+          <circle cx="400" cy="225" r="90" fill="none" stroke="rgba(255,0,200,0.1)" stroke-width="1"/>
+          <circle cx="400" cy="225" r="50" fill="rgba(0,245,255,0.05)"/>
+          <ellipse cx="400" cy="225" rx="200" ry="30" fill="none" stroke="rgba(0,245,255,0.08)" stroke-width="1"/>
+          <text x="400" y="233" font-family="Orbitron" font-size="22" fill="rgba(0,245,255,0.4)" text-anchor="middle" letter-spacing="8">DUNE</text>
+          <line x1="0" y1="225" x2="800" y2="225" stroke="rgba(0,245,255,0.04)" stroke-width="1"/>
+          <line x1="400" y1="0" x2="400" y2="450" stroke="rgba(0,245,255,0.04)" stroke-width="1"/>
+        </svg>
+        <div class="card-badge badge-novel">小説</div>
+      </div>
+      <div class="card-body">
+        <p class="card-meta">Frank Herbert — 2024.11.28</p>
+        <h3 class="card-title">DUNE<br><small style="font-size:0.7rem;font-weight:400;color:var(--muted);">砂の惑星</small></h3>
+        <p class="card-excerpt">宇宙最大の砂漠の星アラキスを舞台に繰り広げられる壮大な叙事詩。政治・宗教・生態学が複雑に絡み合う傑作SF小説。半世紀を超えてなお輝き続ける、SFの頂点に立つ作品。</p>
+        <div class="rating">
+          <div class="stars">
+            <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+          </div>
+          <span class="rating-num">9.8</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side cards -->
+    <div class="side-cards">
+      <div class="card-side">
+        <div class="card-body">
+          <span class="card-badge badge-film" style="position:static;display:inline-block;margin-bottom:0.75rem;">映画</span>
+          <p class="card-meta">2025.01.15</p>
+          <h3 class="card-title-small">インターステラー<br><small style="font-size:0.65rem;font-weight:300;color:var(--muted);">Interstellar</small></h3>
+          <div class="rating" style="margin-top:0.5rem;">
+            <div class="stars">
+              <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+            </div>
+            <span class="rating-num">9.5</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-side">
+        <div class="card-body">
+          <span class="card-badge badge-game" style="position:static;display:inline-block;margin-bottom:0.75rem;">ゲーム</span>
+          <p class="card-meta">2025.02.03</p>
+          <h3 class="card-title-small">Mass Effect<br><small style="font-size:0.65rem;font-weight:300;color:var(--muted);">Legendary Edition</small></h3>
+          <div class="rating" style="margin-top:0.5rem;">
+            <div class="stars">
+              <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star empty"></div>
+            </div>
+            <span class="rating-num">9.1</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-side">
+        <div class="card-body">
+          <span class="card-badge badge-series" style="position:static;display:inline-block;margin-bottom:0.75rem;">シリーズ</span>
+          <p class="card-meta">2024.12.20</p>
+          <h3 class="card-title-small">フォールアウト<br><small style="font-size:0.65rem;font-weight:300;color:var(--muted);">Prime Video</small></h3>
+          <div class="rating" style="margin-top:0.5rem;">
+            <div class="stars">
+              <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star empty"></div>
+            </div>
+            <span class="rating-num">8.9</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section style="padding-top:0;">
+  <div class="section-header">
+    <span class="section-label">// カテゴリ</span>
+    <h2 class="section-title">ジャンルで探す</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="categories">
+    <a href="ranking.html?cat=novel" class="cat-card">
+      <span class="cat-icon">📖</span>
+      <div class="cat-name">小説</div>
+      <div class="cat-count">142 REVIEWS</div>
+    </a>
+    <a href="ranking.html?cat=film" class="cat-card">
+      <span class="cat-icon">🎬</span>
+      <div class="cat-name">映画</div>
+      <div class="cat-count">98 REVIEWS</div>
+    </a>
+    <a href="ranking.html?cat=game" class="cat-card">
+      <span class="cat-icon">🎮</span>
+      <div class="cat-name">ゲーム</div>
+      <div class="cat-count">75 REVIEWS</div>
+    </a>
+    <a href="ranking.html?cat=series" class="cat-card">
+      <span class="cat-icon">📺</span>
+      <div class="cat-name">シリーズ</div>
+      <div class="cat-count">61 REVIEWS</div>
+    </a>
+  </div>
+</section>
+
+<!-- RECENT REVIEWS -->
+<section style="padding-top:0;">
+  <div class="section-header">
+    <span class="section-label">// 最新</span>
+    <h2 class="section-title">新着レビュー</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="reviews-grid">
+    <div class="review-card">
+      <div class="hud-corner tl"></div>
+      <div class="review-num">01</div>
+      <span class="card-badge badge-novel" style="position:static;display:inline-block;margin-bottom:1rem;">小説</span>
+      <h3 class="card-title-small">ニューロマンサー</h3>
+      <p class="card-meta">William Gibson — 2025.03.10</p>
+      <p class="card-excerpt" style="margin:0.75rem 0 1rem;">サイバーパンクの原典。電脳空間を舞台に繰り広げられるハッカーの冒険。現代のデジタル社会を予言した不朽の名作。</p>
+      <div class="rating"><div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div><span class="rating-num">9.4</span></div>
+    </div>
+
+    <div class="review-card">
+      <div class="hud-corner tl"></div>
+      <div class="review-num">02</div>
+      <span class="card-badge badge-film" style="position:static;display:inline-block;margin-bottom:1rem;">映画</span>
+      <h3 class="card-title-small">エイリアン: ロムルス</h3>
+      <p class="card-meta">2024 — 2025.02.28</p>
+      <p class="card-excerpt" style="margin:0.75rem 0 1rem;">シリーズの原点回帰。閉塞的な宇宙ステーションで繰り広げられるサバイバルホラー。若い世代が放つ恐怖と緊張感。</p>
+      <div class="rating"><div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star empty"></div></div><span class="rating-num">8.3</span></div>
+    </div>
+
+    <div class="review-card">
+      <div class="hud-corner tl"></div>
+      <div class="review-num">03</div>
+      <span class="card-badge badge-game" style="position:static;display:inline-block;margin-bottom:1rem;">ゲーム</span>
+      <h3 class="card-title-small">Stellar Blade</h3>
+      <p class="card-meta">2024 — 2025.02.14</p>
+      <p class="card-excerpt" style="margin:0.75rem 0 1rem;">退廃した地球を舞台にした韓国産アクションRPG。美麗なビジュアルと歯応えある戦闘システムが融合した意欲作。</p>
+      <div class="rating"><div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star empty"></div></div><span class="rating-num">8.7</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <a class="logo" href="index.html">NOVA<span>SIGNAL</span></a>
+    <p class="footer-desc">宇宙の隅々まで探索するSFレビューサイト。<br>すべての銀河のSF作品を記録・評価します。</p>
+  </div>
+
+  <div>
+    <p class="footer-title">Navigation</p>
+    <ul class="footer-links">
+      <li><a href="index.html">ホーム</a></li>
+      <li><a href="ranking.html">ランキング</a></li>
+      <li><a href="blog.html">ブログ</a></li>
+      <li><a href="contact.html">コンタクト</a></li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="footer-title">Categories</p>
+    <ul class="footer-links">
+      <li><a href="#">小説レビュー</a></li>
+      <li><a href="#">映画レビュー</a></li>
+      <li><a href="#">ゲームレビュー</a></li>
+      <li><a href="#">シリーズレビュー</a></li>
+    </ul>
+  </div>
+
+  <div class="footer-copy">
+    <p class="footer-copy-text">© 2025 NOVASIGNAL. All rights reserved. Transmission from sector 7G.</p>
+    <div class="status-dot">
+      <div class="dot"></div>
+      <span class="status-text">System Online</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Star field
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+function initStars() {
+  stars = [];
+  for (let i = 0; i < 200; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.5,
+      o: Math.random(),
+      speed: Math.random() * 0.3 + 0.05,
+      pulse: Math.random() * Math.PI * 2
+    });
+  }
+}
+
+function drawStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.pulse += 0.02;
+    const opacity = s.o * (0.6 + 0.4 * Math.sin(s.pulse));
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,218,240,${opacity})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+
+resize();
+initStars();
+drawStars();
+window.addEventListener('resize', () => { resize(); initStars(); });
+
+// Glitch effect (random trigger)
+setInterval(() => {
+  const glitch = document.querySelector('.glitch');
+  if (glitch) {
+    glitch.style.animation = 'none';
+    setTimeout(() => { glitch.style.animation = ''; }, 50);
+  }
+}, 5000);
+</script>
 </body>
 </html>
